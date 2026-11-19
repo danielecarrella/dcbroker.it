@@ -12,7 +12,7 @@
   // il browser tende a riaprire la pagina alla posizione di scroll precedente: lo disattiviamo
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   const toTop = () => window.scrollTo(0, 0);
-  // eccezione: i link al modulo (#contatti o ?area=...) devono scendere al modulo
+  // eccezione: i link con ancora (#contatti) devono scendere alla sezione
   const goesToForm = () => !!location.hash || /[?&](area|prodotto)=/.test(location.search);
   if (!goesToForm()) {
     toTop();
@@ -207,37 +207,6 @@
     document.querySelectorAll('a, button, .card, input, select, textarea').forEach((el) => {
       el.addEventListener('pointerenter', () => cursor.classList.add('is-hover'));
       el.addEventListener('pointerleave', () => cursor.classList.remove('is-hover'));
-    });
-  }
-
-  /* ---------- Form contatti (apre il client email) ---------- */
-  const form = document.getElementById('contact-form');
-  if (form) {
-    // precompila da link tipo contatti.html?area=Azienda&prodotto=RC%20Professionale
-    const params = new URLSearchParams(location.search);
-    const area = params.get('area');
-    const prodotto = params.get('prodotto');
-    const select = form.querySelector('select[name="area"]');
-    if (area && select && [...select.options].some((o) => o.value === area)) select.value = area;
-    if (prodotto) form.querySelector('textarea[name="messaggio"]').value = `Vorrei ricevere informazioni su: ${prodotto}.`;
-    if ((area || prodotto) && location.hash !== '#contatti') {
-      const target = document.getElementById('contatti');
-      if (target) setTimeout(() => (lenis ? lenis.scrollTo(target, { offset: -70 }) : target.scrollIntoView()), 900);
-    }
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const d = new FormData(form);
-      const subject = `Richiesta dal sito – ${d.get('area')}`;
-      const body =
-        `Nome: ${d.get('nome')}
-Telefono: ${d.get('telefono') || '-'}
-Email: ${d.get('email')}
-` +
-        `Consulenza per: ${d.get('area')}
-
-${d.get('messaggio') || ''}`;
-      window.location.href = `mailto:${form.dataset.mailto || 'info@dcbroker.it'}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     });
   }
 
